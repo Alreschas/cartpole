@@ -28,7 +28,7 @@ class cart_pole:
         self.th = np.pi + 0.01
         self.thd = 0
         self.thdd = 0
-        self.friction = 0.1
+        self.friction = 0.0
 
     def simulateSingleStep(self):
         A = np.matrix([[self.m + self.M, self.m * self.l * np.cos(self.th)],
@@ -36,7 +36,7 @@ class cart_pole:
         b = np.matrix([[self.F + self.m * self.l * self.thd**2 * np.sin(self.th)],
                        [-self.friction * self.thd - self.g * np.sin(self.th)]])
         x = np.linalg.inv(A).dot(b)
-        print(x)
+
         self.xdd = x[0, 0]
         self.xd += self.xdd * self.dt
         self.x += self.xd * self.dt
@@ -55,25 +55,26 @@ class robot(cart_pole):
         self.offset_x = 800 / 2.
         self.offset_y = 400 / 2.
 
-        self.cart_size_x = 70.
-        self.cart_size_y = 50.
+        self.cart_size_x = 50.
+        self.cart_size_y = 40.
 
-        self.tire_size = 15.
+        self.tire_size = 10.
 
         self.cart_x = self.offset_x
         self.cart_y = self.offset_y
 
-        self.tire1_x = self.cart_x + self.cart_size_x * 0.8
-        self.tire2_x = self.cart_x - self.cart_size_x * 0.8
+        self.tire1_x = self.cart_x + self.cart_size_x - self.tire_size
+        self.tire2_x = self.cart_x - self.cart_size_x + self.tire_size
         self.tire_y = self.cart_y + self.cart_size_y
 
         self.ground_y = self.offset_y - self.cart_size_y
 
-        self.ground = self.canvas.create_line(100, self.offset_y + self.cart_size_y, self.offset_x * 2 - 100, self.offset_y + self.cart_size_y, width=2.0, fill='#00ff00')
-        self.tire1 = self.canvas.create_oval(self.tire1_x - 0.5 * self.tire_size, self.tire_y, self.tire1_x + 0.5 * self.tire_size, self.tire_y - self.tire_size, tag="oval", fill='#acb3ac')
-        self.tire2 = self.canvas.create_oval(self.tire2_x - 0.5 * self.tire_size, self.tire_y, self.tire2_x + 0.5 * self.tire_size, self.tire_y - self.tire_size, tag="oval", fill='#acb3ac')
-        self.cart = self.canvas.create_rectangle(self.cart_x - self.cart_size_x, self.cart_y - self.cart_size_y + self.tire_size, self.cart_x + self.cart_size_x, self.cart_y + self.cart_size_y - self.tire_size, fill="#c6c6c6")
-        self.pole = self.canvas.create_line(self.cart_x, self.cart_y, self.cart_x + 200 * self.l * np.sin(self.th), self.cart_y + 200 * self.l * np.cos(self.th), width=2.0, fill='#5a43eb')
+        self.ground = self.canvas.create_line(100, self.offset_y + self.cart_size_y, self.offset_x * 2 - 100, self.offset_y + self.cart_size_y, width=2.0, fill='#000000')
+        self.tire1 = self.canvas.create_oval(self.tire1_x - 0.5 * self.tire_size, self.tire_y, self.tire1_x + 0.5 * self.tire_size, self.tire_y - self.tire_size, tag="oval", fill='#ffffff')
+        self.tire2 = self.canvas.create_oval(self.tire2_x - 0.5 * self.tire_size, self.tire_y, self.tire2_x + 0.5 * self.tire_size, self.tire_y - self.tire_size, tag="oval", fill='#ffffff')
+        self.cart = self.canvas.create_rectangle(self.cart_x - self.cart_size_x, self.cart_y - self.cart_size_y + self.tire_size, self.cart_x + self.cart_size_x, self.cart_y + self.cart_size_y - self.tire_size, fill="#ffffff")
+        self.pole = self.canvas.create_line(self.cart_x, self.cart_y, self.cart_x + 200 * self.l * np.sin(self.th), self.cart_y + 200 * self.l * np.cos(self.th), width=10.0, fill='#000000')
+        self.joint = self.canvas.create_oval(self.cart_x - 10, self.cart_y - 10, self.cart_x + 10, self.cart_y + 10, fill="#ffffff")
 
         print(self.canvas.winfo_width())
 
@@ -81,19 +82,20 @@ class robot(cart_pole):
         self.simulateSingleStep()
 
         self.cart_x = self.offset_x + self.x * 100
-        self.tire1_x = self.cart_x + self.cart_size_x * 0.8
-        self.tire2_x = self.cart_x - self.cart_size_x * 0.8
+        self.tire1_x = self.cart_x + self.cart_size_x - self.tire_size
+        self.tire2_x = self.cart_x - self.cart_size_x + self.tire_size
 
         self.canvas.coords(self.tire1, self.tire1_x - 0.5 * self.tire_size, self.tire_y, self.tire1_x + 0.5 * self.tire_size, self.tire_y - self.tire_size)
         self.canvas.coords(self.tire2, self.tire2_x - 0.5 * self.tire_size, self.tire_y, self.tire2_x + 0.5 * self.tire_size, self.tire_y - self.tire_size)
 
         self.canvas.coords(self.cart, self.cart_x - self.cart_size_x, self.cart_y - self.cart_size_y + self.tire_size, self.cart_x + self.cart_size_x, self.cart_y + self.cart_size_y - self.tire_size)
         self.canvas.coords(self.pole, self.cart_x, self.cart_y, self.cart_x + 200 * self.l * np.sin(self.th), self.cart_y + 200 * self.l * np.cos(self.th))
+        self.canvas.coords(self.joint, self.cart_x - 10, self.cart_y - 10, self.cart_x + 10, self.cart_y + 10)
 
 
 root = tk.Tk()
 
-canvas = tk.Canvas(root, width=800, height=400)
+canvas = tk.Canvas(root, width=800, height=500)
 # キャンバスバインド
 rb = robot(canvas)
 # canvas.place(x=0, y=0)
